@@ -1,0 +1,578 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+ */
+package com.mbstu.cse.habib.phonebook;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
+
+/**
+ *
+ * @author DELL
+ */
+public class PhoneBookFrame extends javax.swing.JFrame {
+
+    private int selectedContactId;
+    private int selectedRow = -1;
+
+    /**
+     * Creates new form PhoneBookFrame
+     */
+    public PhoneBookFrame() {
+        initComponents();
+        fetchContacts("");
+
+        contactTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent event) {
+                if (!event.getValueIsAdjusting()) {
+                    selectedRow = contactTable.getSelectedRow();
+                    if (selectedRow != -1) { // If a row is selected
+                        // Retrieve data from the selected row
+                        String firstName = (String) model.getValueAt(selectedRow, 0);
+                        String lastName = (String) model.getValueAt(selectedRow, 1);
+                        String location = (String) model.getValueAt(selectedRow, 2);
+                        String phoneNumber = (String) model.getValueAt(selectedRow, 3);
+
+                        // Set the retrieved data to the form fields
+                        FirstNameTextField.setText(firstName);
+                        LastNameTextField.setText(lastName);
+                        LocationTextField.setText(location);
+                        PhoneBookTextField.setText(phoneNumber);
+
+                        AddButton.setEnabled(false);
+
+                        try {
+                            Connection connection = DBConnect.getConnection();
+
+                            String idSql = "SELECT id FROM contacts WHERE phone_number=?";
+
+                            PreparedStatement idStatement = connection.prepareStatement(idSql);
+                            idStatement.setString(1, phoneNumber);
+                            ResultSet resultSet = idStatement.executeQuery();
+
+                            if (resultSet.next()) {
+                                selectedContactId = resultSet.getInt("id");
+                            }
+
+                        } catch (SQLException ex) {
+                            Logger.getLogger(PhoneBookFrame.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }
+            }
+        });
+
+    }
+
+    private DefaultTableModel model;
+
+    private void fetchContacts(String query) {
+        model = new DefaultTableModel(new String[]{"FIRST NAME", "LAST NAME", "LOCATION", "PHONE"}, 0);
+        try {
+            Connection connection = DBConnect.getConnection();
+            String sql = "SELECT first_name, last_name, location, phone_number FROM contacts";
+            if (!query.isEmpty()) {
+                sql += " WHERE first_name LIKE ? OR last_name LIKE ? OR location LIKE ? OR phone_number LIKE ?";
+            }
+            PreparedStatement statement = connection.prepareStatement(sql);
+            if (!query.isEmpty()) {
+                for (int i = 1; i <= 4; i++) {
+                    statement.setString(i, "%" + query + "%");
+                }
+            }
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                String firstName = resultSet.getString("first_name");
+                String lastName = resultSet.getString("last_name");
+                String location = resultSet.getString("location");
+                String phoneNumber = resultSet.getString("phone_number");
+                model.addRow(new Object[]{firstName, lastName, location, phoneNumber});
+            }
+            contactTable.setModel(model);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error fetching contacts: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void clearForm() {
+        FirstNameTextField.setText("");
+        LastNameTextField.setText("");
+        LocationTextField.setText("");
+        PhoneBookTextField.setText("");
+
+        contactTable.clearSelection();
+        selectedRow = -1;
+
+        AddButton.setEnabled(true);
+        EditButton.setEnabled(true);
+        DeleteButton.setEnabled(true);
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        SearchTextField = new javax.swing.JTextField();
+        jSeparator1 = new javax.swing.JSeparator();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        FirstNameTextField = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        LastNameTextField = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        LocationTextField = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        PhoneBookTextField = new javax.swing.JTextField();
+        AddButton = new javax.swing.JButton();
+        ClearButton = new javax.swing.JButton();
+        DeleteButton = new javax.swing.JButton();
+        EditButton = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        contactTableScrollPane = new javax.swing.JScrollPane();
+        contactTable = new javax.swing.JTable();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Phone Book");
+
+        jLabel1.setFont(new java.awt.Font("Arial", 1, 24)); // NOI18N
+        jLabel1.setText("PHONE BOOK");
+
+        jLabel2.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel2.setText("Search :");
+
+        SearchTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                SearchTextFieldActionPerformed(evt);
+            }
+        });
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Enter Contact Details"));
+
+        jLabel3.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel3.setText("First Name: ");
+
+        FirstNameTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                FirstNameTextFieldActionPerformed(evt);
+            }
+        });
+
+        jLabel4.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel4.setText("Last Name: ");
+
+        LastNameTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LastNameTextFieldActionPerformed(evt);
+            }
+        });
+
+        jLabel5.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel5.setText("Location:");
+
+        LocationTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LocationTextFieldActionPerformed(evt);
+            }
+        });
+
+        jLabel6.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel6.setText("Phone:");
+
+        PhoneBookTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                PhoneBookTextFieldActionPerformed(evt);
+            }
+        });
+
+        AddButton.setBackground(new java.awt.Color(0, 204, 0));
+        AddButton.setText("Add");
+        AddButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                AddButtonActionPerformed(evt);
+            }
+        });
+
+        ClearButton.setBackground(new java.awt.Color(0, 204, 204));
+        ClearButton.setText("Clear");
+        ClearButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ClearButtonActionPerformed(evt);
+            }
+        });
+
+        DeleteButton.setBackground(new java.awt.Color(255, 0, 51));
+        DeleteButton.setText("Delete");
+        DeleteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                DeleteButtonActionPerformed(evt);
+            }
+        });
+
+        EditButton.setBackground(new java.awt.Color(255, 204, 0));
+        EditButton.setText("Edit");
+        EditButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                EditButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(ClearButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(FirstNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(LocationTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(PhoneBookTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel4)
+                            .addComponent(AddButton))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 19, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(LastNameTextField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addComponent(EditButton)
+                                .addGap(47, 47, 47)
+                                .addComponent(DeleteButton)))))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(FirstNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(LastNameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(LocationTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(PhoneBookTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(48, 48, 48)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(AddButton, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(DeleteButton, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(EditButton, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(27, 27, 27)
+                .addComponent(ClearButton, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
+        contactTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "FIRST NAME", "LAST NAME", "LOCATION", "PHONE"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        contactTableScrollPane.setViewportView(contactTable);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(contactTableScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(contactTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addGap(18, 18, 18)
+                                .addComponent(SearchTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 231, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(jSeparator1))
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 271, Short.MAX_VALUE)
+                        .addComponent(jLabel1)
+                        .addGap(260, 260, 260))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(14, 14, 14))))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(33, 33, 33)
+                .addComponent(jLabel1)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2)
+                    .addComponent(SearchTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(14, 14, 14)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(135, Short.MAX_VALUE))
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void FirstNameTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FirstNameTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_FirstNameTextFieldActionPerformed
+
+    private void LastNameTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LastNameTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_LastNameTextFieldActionPerformed
+
+    private void LocationTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LocationTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_LocationTextFieldActionPerformed
+
+    private void PhoneBookTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PhoneBookTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_PhoneBookTextFieldActionPerformed
+
+    private void AddButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddButtonActionPerformed
+        // Retrieve data from text fields
+        String firstName = FirstNameTextField.getText();
+        String lastName = LastNameTextField.getText();
+        String location = LocationTextField.getText();
+        String phoneNumber = PhoneBookTextField.getText();
+
+        if (phoneNumber.isEmpty() || firstName.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "First Name and phone number is mandatory", "Error", JOptionPane.ERROR_MESSAGE);
+            return; // Exit method if phone number is empty
+        }
+
+        // Prepare SQL statement
+        String sql = "INSERT INTO contacts (first_name, last_name, location, phone_number) VALUES (?, ?, ?, ?)";
+        try {
+            Connection connection = DBConnect.getConnection();
+
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, firstName);
+            statement.setString(2, lastName);
+            statement.setString(3, location);
+            statement.setString(4, phoneNumber);
+
+            // Execute the insert statement
+            int rowsInserted = statement.executeUpdate();
+
+            fetchContacts("");
+
+            clearForm();
+
+            if (rowsInserted > 0) {
+                JOptionPane.showMessageDialog(this, "Contact added successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error adding contact: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_AddButtonActionPerformed
+
+    private void ClearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ClearButtonActionPerformed
+        clearForm();
+    }//GEN-LAST:event_ClearButtonActionPerformed
+
+    private void EditButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EditButtonActionPerformed
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a contact to edit.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Retrieve data from the form fields
+        String firstName = FirstNameTextField.getText();
+        String lastName = LastNameTextField.getText();
+        String location = LocationTextField.getText();
+        String phoneNumber = PhoneBookTextField.getText();
+
+        try {
+            Connection connection = DBConnect.getConnection();
+
+            // Prepare SQL statement to update the record using the fetched ID
+            String updateSql = "UPDATE contacts SET first_name=?, last_name=?, location=?, phone_number=? WHERE id=?";
+            PreparedStatement updateStatement = connection.prepareStatement(updateSql);
+            updateStatement.setString(1, firstName);
+            updateStatement.setString(2, lastName);
+            updateStatement.setString(3, location);
+            updateStatement.setString(4, phoneNumber);
+            updateStatement.setInt(5, selectedContactId);
+
+            // Execute the update statement
+            int rowsUpdated = updateStatement.executeUpdate();
+            if (rowsUpdated > 0) {
+                fetchContacts("");
+
+                clearForm();
+
+                JOptionPane.showMessageDialog(this, "Contact updated successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to update contact.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error updating contact: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_EditButtonActionPerformed
+
+    private void DeleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DeleteButtonActionPerformed
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a contact to delete.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Confirm deletion
+        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this contact?", "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+        if (confirm != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        String deleteSql = "DELETE FROM contacts WHERE id=?";
+
+        try {
+            Connection connection = DBConnect.getConnection();
+            PreparedStatement deleteStatement = connection.prepareStatement(deleteSql);
+            deleteStatement.setInt(1, selectedContactId);
+
+            // Execute the delete statement
+            int rowsDeleted = deleteStatement.executeUpdate();
+            if (rowsDeleted > 0) {
+                fetchContacts("");
+                clearForm();
+
+                JOptionPane.showMessageDialog(this, "Contact deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to delete contact.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error deleting contact: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_DeleteButtonActionPerformed
+
+    private void SearchTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SearchTextFieldActionPerformed
+        String query = SearchTextField.getText().trim();
+        fetchContacts(query);
+    }//GEN-LAST:event_SearchTextFieldActionPerformed
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(PhoneBookFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(PhoneBookFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(PhoneBookFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(PhoneBookFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new PhoneBookFrame().setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton AddButton;
+    private javax.swing.JButton ClearButton;
+    private javax.swing.JButton DeleteButton;
+    private javax.swing.JButton EditButton;
+    private javax.swing.JTextField FirstNameTextField;
+    private javax.swing.JTextField LastNameTextField;
+    private javax.swing.JTextField LocationTextField;
+    private javax.swing.JTextField PhoneBookTextField;
+    private javax.swing.JTextField SearchTextField;
+    private javax.swing.JTable contactTable;
+    private javax.swing.JScrollPane contactTableScrollPane;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JSeparator jSeparator1;
+    // End of variables declaration//GEN-END:variables
+}
